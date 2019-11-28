@@ -70,4 +70,13 @@ public class PaperEntity {
     public void setUncheckNum(int uncheckNum) {
         this.uncheckNum = uncheckNum;
     }
+
+    public PaperEntity(String title, String abst, String resUrl, int browseNum, int evalNum, int uncheckNum) {
+        this.title = title;
+        this.abst = abst;
+        this.resUrl = resUrl;
+        this.browseNum = browseNum;
+        this.evalNum = evalNum;
+        this.uncheckNum = uncheckNum;
+    }
 }
