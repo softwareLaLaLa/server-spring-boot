@@ -45,7 +45,7 @@ public class PaperSimpleData implements Serializable {
 
     public PaperSimpleData(PaperEntity paperEntity, List<String> tagList) {
         this.paper_id = paperEntity.getId();
-        this.abst = paperEntity.getAbst();
+        //this.abst = paperEntity.getAbst();
         this.title = paperEntity.getTitle();
         this.totalBrowseNum = paperEntity.getBrowseNum();
         this.tagList = tagList;
@@ -55,13 +55,13 @@ public class PaperSimpleData implements Serializable {
     String title;
     int totalBrowseNum;
     List<String> tagList = new ArrayList<>();
-    String abst;
+    //String abst;
 
-    public void setAbst(String abst) {
-        this.abst = abst;
-    }
-
-    public String getAbst() {
-        return abst;
-    }
+//    public void setAbst(String abst) {
+//        this.abst = abst;
+//    }
+//
+//    public String getAbst() {
+//        return abst;
+//    }
 }

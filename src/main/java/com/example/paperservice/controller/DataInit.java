@@ -13,7 +13,7 @@ import java.util.Map;
 @Component
 public class DataInit {
     @Autowired
-    RedisService redisService; //redisServiceaddPaperTagData(int paper_id, Map<Integer, TagRela> map)
+    RedisService redisService; //redisService.addPaperTagData(int paper_id, Map<Integer, TagRela> map)
     @Autowired
     PaperDao paperDao;  //paperDap.save()
     @Autowired

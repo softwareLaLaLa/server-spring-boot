@@ -25,7 +25,7 @@ public class EvalEntity {
     private int paper_id;
 
     @Column(name = "eval")
-    private int eval;
+    private float eval;
 
     //@Column(name = "tags")
     //private String tagIDList;
@@ -49,7 +49,7 @@ public class EvalEntity {
         return paper_id;
     }
 
-    public int getEval() {
+    public float getEval() {
         return eval;
     }
 

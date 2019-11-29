@@ -3,10 +3,8 @@ package com.example.paperservice.controller;
 import com.example.paperservice.Entity.*;
 import com.example.paperservice.database.*;
 import com.google.gson.Gson;
-import com.netflix.discovery.converters.Auto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
@@ -26,6 +24,9 @@ public class RecommendService {
 
     //添加评价，可以用队列实现
     public void addEvalData(List<EvalEntity> evalList){
+        for(EvalEntity evalEntity: evalList){
+            addBrowseNumForPaper(evalEntity.getPaper_id());
+        }
         evaluationDao.saveAll(evalList);
     }
 
@@ -117,12 +118,12 @@ public class RecommendService {
         List<PaperSimpleData> result = new ArrayList<>();
         for(HotPaperEntity entity: hotPaperEntityList){
             int paper_id = entity.getId();
-            result.add(getPaper(paper_id));
+            result.add(getPaperSimpleData(paper_id));
         }
         return result;
     }
 
-    private PaperSimpleData getPaper(int paper_id){
+    private PaperSimpleData getPaperSimpleData(int paper_id){
         PaperEntity paperEntity = paperDao.findById(paper_id);
         Map<Integer, TagRela> tagRelaMap = redisService.getPaperTagData(paper_id);
         List<String> tagList = new ArrayList<>();
@@ -193,5 +194,11 @@ public class RecommendService {
         calendar.set(Calendar.DAY_OF_YEAR, calendar.get(Calendar.DAY_OF_YEAR) - past);
         Date date = calendar.getTime();
         tagDao.deleteByDateBeforeAndNumLessThan(date, usedNum);
+    }
+
+    public PaperData getPaperData(int paper_id){
+        PaperEntity paperEntity = paperDao.findById(paper_id);
+        List<List<TagSimpleData>> tagData = getRecommendTag(paper_id);
+        return new PaperData(paperEntity, tagData);
     }
 }

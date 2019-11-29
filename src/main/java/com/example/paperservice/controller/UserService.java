@@ -5,9 +5,7 @@ import com.example.paperservice.database.EvaluationDao;
 import com.example.paperservice.database.RedisService;
 import com.example.paperservice.database.TagDao;
 import com.example.paperservice.database.UserDao;
-import com.example.paperservice.util.MatrixCalcu;
-import com.google.common.collect.HashMultiset;
-import com.google.common.collect.Multiset;
+import com.example.paperservice.util.Calculator;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -100,7 +98,7 @@ public class UserService {
             List<List<Float>> paperTagRel = getMatrixData(paperList, userTagMap.keySet());
             List<Float> newValueList = new ArrayList<>();
             //执行python代码
-            newValueList = MatrixCalcu.multiple(userValueList, paperTagRel);
+            newValueList = Calculator.multiple(userValueList, paperTagRel);
             int count = 0;
             for(Map.Entry<Integer, Float> entry: userTagMap.entrySet()){
                 System.out.println("更新前tag数据："+entry);
@@ -183,8 +181,25 @@ public class UserService {
         }
         List<List<Float>> newValueList = getMatrixData2(tagList, relativeGroup);
         //对每个group的感兴趣程度
-        List<Float> newUserValueGroupValue = MatrixCalcu.multiple(usrTagRel, newValueList);
+        List<Float> newUserValueGroupValue = Calculator.multiple(usrTagRel, newValueList);
+        Collections.sort(newUserValueGroupValue);
         //分为两个group存储在mysql中
-
+        float border = Calculator.divide(newUserValueGroupValue);
+        System.out.println("用户对group的喜好程度为："+newUserValueGroupValue+" 分割界限："+border);
+        List<Integer> favorGroup = new ArrayList<>();
+        List<Integer> candidateGroup = new ArrayList<>();
+        int count = 0;
+        for(Integer groupID: relativeGroup){
+            float value = newUserValueGroupValue.get(count++);
+            if(value <= border){
+                candidateGroup.add(groupID);
+            }else{
+                favorGroup.add(groupID);
+            }
+        }
+        UserEntity userEntity = userDao.findById(usr_id);
+        userEntity.setCandidateGroup(gson.toJson(candidateGroup));
+        userEntity.setGroup(gson.toJson(favorGroup));
+        userDao.save(userEntity);
     }
 }

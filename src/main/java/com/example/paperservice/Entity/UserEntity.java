@@ -26,7 +26,7 @@ public class UserEntity {
     @Column(name = "candidateGroup")
     private String candidateGroup;
 
-    @Column(name = "group")
+    @Column(name = "favorGroup")
     private String group;
 
     public String getCandidateGroup() {
@@ -61,5 +61,13 @@ public class UserEntity {
         this.name = name;
         this.password = password;
         this.role = role;
+    }
+
+    public void setCandidateGroup(String candidateGroup) {
+        this.candidateGroup = candidateGroup;
+    }
+
+    public void setGroup(String group) {
+        this.group = group;
     }
 }

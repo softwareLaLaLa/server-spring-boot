@@ -71,4 +71,7 @@ public class ApplicationService {
     public List<PaperSimpleData> getHotPaper(){
         return recommendService.getHotPaper();
     }
+
+    @GetMapping("/paperData")
+    public PaperData getPaper(int paper_id){return recommendService.getPaperData(paper_id);}
 }

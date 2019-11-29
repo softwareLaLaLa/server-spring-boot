@@ -6,7 +6,7 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MatrixCalcu
+public class Calculator
 {
 	//����˷�����
 	public static List<Float> multiple(List<Float> m1, List<List<Float>> m2){
@@ -50,4 +50,24 @@ public class MatrixCalcu
 		return res;
 	}
 
+	public static float divide(List<Float> valueList){
+		float result = -1;
+		int length = valueList.size();
+		String commandStr = new String("python matrixCalcu.py " + length);
+		for (Float f : valueList) {
+			commandStr = commandStr + " " + f;
+		}
+		try {
+			Process pr = Runtime.getRuntime().exec(commandStr);
+			BufferedReader in = new BufferedReader(new InputStreamReader(pr.getInputStream()));
+			String line = null;
+			while ((line = in.readLine()) != null) {
+				result = Float.parseFloat(line);
+			}
+			in.close();
+		}catch (Exception e){
+			e.printStackTrace();
+		}
+		return result;
+	}
 }
