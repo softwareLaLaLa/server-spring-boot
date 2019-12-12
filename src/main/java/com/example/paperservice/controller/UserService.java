@@ -14,6 +14,9 @@ import org.springframework.stereotype.Component;
 import java.lang.reflect.Type;
 import java.util.*;
 
+import static com.example.paperservice.util.Calculator.getMatrixData;
+import static com.example.paperservice.util.Calculator.getMatrixData2;
+
 @Component
 public class UserService {
     @Autowired
@@ -36,11 +39,16 @@ public class UserService {
     }
 
     public void updateBrowseHistory(BrowseHistory browseHistory){
+        Gson gson = new Gson();
+        System.out.println("update browse history: " + gson.toJson(browseHistory));
         redisService.addBrowseHistory(browseHistory.getUsr_id(), browseHistory.getBrowsePaperData());
     }
 
     public UserEntity getAuthData(String name){
-        return userDao.findByName(name);
+        if(userDao.existsByName(name)){
+            return userDao.findByName(name);
+        }
+        return null;
     }
 
     public void addUser(String name, String password, String role){
@@ -62,13 +70,13 @@ public class UserService {
         Calendar calendar = Calendar.getInstance();
         calendar.set(Calendar.DAY_OF_YEAR, calendar.get(Calendar.DAY_OF_YEAR) - past);
         Date date = calendar.getTime();
-        if(evaluationDao.countEvalNumByUsr_idAndDateAfter(usr_id, date) > dataNum){
-            evaluationDao.deleteByUsr_idAndDateBefore(usr_id, date);
+        if(evaluationDao.countByUsrIdAndDateAfter(usr_id, date) > dataNum){
+            evaluationDao.deleteByUsrIdAndDateBefore(usr_id, date);
         }
     }
     //更新用户tag数据
     private void refreshUserTagData(int usr_id){
-        List<EvalEntity> evalList = evaluationDao.findByUsr_idOrderByDateDesc(usr_id);
+        List<EvalEntity> evalList = evaluationDao.findByUsrIdOrderByDateDesc(usr_id);
         System.out.println("用户："+usr_id +" 评价记录："+evalList);
         if(evalList != null){
             if(evalList.size() == 0){
@@ -76,7 +84,7 @@ public class UserService {
             }
             Date lastDate = evalList.get(0).getDate();
             List<Float> userValueList = new ArrayList<>();
-            //Multiset relativeTag = HashMultiset.create();;
+            Set<Integer> relativeTag = new HashSet<>();
             List<Map<Integer, TagRela>> paperList = new ArrayList<>();
             float w1 = 7; float w2 = 14*14/2;
             //SimpleDateFormat simpleFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm");
@@ -89,79 +97,25 @@ public class UserService {
                     Float userValue = w2*evalEntity.getEval()/(dateGap*dateGap);
                     userValueList.add(userValue);
                 }
-                int paper_id = evalEntity.getPaper_id();
+                int paper_id = evalEntity.getPaperid();
                 Map<Integer, TagRela> paperTagMap = redisService.getPaperTagData(paper_id);
-                //relativeTag.addAll(paperTagMap.keySet());
+                relativeTag.addAll(paperTagMap.keySet());
                 paperList.add(paperTagMap);
             }
-            Map<Integer, Float> userTagMap = redisService.getUserTagData(usr_id);
-            List<List<Float>> paperTagRel = getMatrixData(paperList, userTagMap.keySet());
+            //Map<Integer, Float> userTagMap = redisService.getUserTagData(usr_id);
+            List<List<Float>> paperTagRel = getMatrixData(paperList, relativeTag);
             List<Float> newValueList = new ArrayList<>();
             //执行python代码
             newValueList = Calculator.multiple(userValueList, paperTagRel);
             int count = 0;
-            for(Map.Entry<Integer, Float> entry: userTagMap.entrySet()){
-                System.out.println("更新前tag数据："+entry);
-                int tag_id = entry.getKey();
-                Float relation = entry.getValue();
-                relation = newValueList.get(count++);
-                System.out.println("更新后tag数据："+entry);
+            Map<Integer, Float> userTagMap = new HashMap<>();
+            for(Integer tagID :relativeTag){
+                //System.out.println("更新前tag数据："+entry);
+                userTagMap.put(tagID, newValueList.get(count++));
+                System.out.println("更新后tag数据： id="+tagID + "relation = "+newValueList.get(count++));
             }
             redisService.refreshUserTagData(usr_id, userTagMap);
         }
-    }
-    //生成矩阵数据
-    private List<List<Float>> getMatrixData(List<Map<Integer, TagRela>> mapList, Set<Integer> relativeSet){
-        float level = (float) 1;
-        System.out.println("关联tag："+relativeSet);
-        List<List<Float>> result = new ArrayList<>();
-        for(Map<Integer, TagRela> tagData: mapList){
-            System.out.println("论文Tag信息："+tagData);
-            List<Float> temp = new ArrayList<>();
-            for(Integer i: relativeSet){
-                TagRela tagRela = tagData.get(i);
-                if(tagRela != null){
-                    if(tagRela.getCorrelation()>level) {
-                        temp.add(tagRela.getCorrelation());
-                        continue;
-                    }
-                    else{
-                        System.out.println("tag:"+i+"相关值过低！");
-                        temp.add((float) 0);
-                    }
-                }
-                System.out.println("error! paper tag:"+i+"相关数据为空");
-                temp.add((float) 0);
-            }
-            result.add(temp);
-        }
-        System.out.println("转化List数据结果："+result);
-        return result;
-    }
-    private List<List<Float>> getMatrixData2(List<Map<Integer, Float>> list, Set<Integer> relativeSet){
-        float level = (float) 1;
-        System.out.println("关联group："+relativeSet);
-        List<List<Float>> result = new ArrayList<>();
-        for(Map<Integer, Float> tagGroupData:list){
-            System.out.println("tagGroup信息："+tagGroupData);
-            List<Float> temp = new ArrayList<>();
-            for(Integer i: relativeSet){
-                Float value = tagGroupData.get(i);
-                if(value != null){
-                    if(value > level) {
-                        temp.add(value);
-                    }else{
-                        System.out.println("tag:"+i+"相关值过低！");
-                        temp.add((float)0);
-                    }
-                    continue;
-                }
-                System.out.println("error! group tag:"+i+"相关数据为空");
-                temp.add((float) 0);
-            }
-        }
-        System.out.println("转化List数据结果："+result);
-        return result;
     }
 
     //计算用户group关联信息
@@ -201,5 +155,9 @@ public class UserService {
         userEntity.setCandidateGroup(gson.toJson(candidateGroup));
         userEntity.setGroup(gson.toJson(favorGroup));
         userDao.save(userEntity);
+    }
+
+    private void clusterPapers(){
+
     }
 }

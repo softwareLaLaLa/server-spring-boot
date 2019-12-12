@@ -14,7 +14,7 @@ public class TagEntity {
     @Column(name = "name")
     private String name;
 
-    @Column(name = "groupIDList")
+    @Column(name = "groupIdList")
     private String groupIDList;
 
     @Column(name = "usedNum")
@@ -56,5 +56,19 @@ public class TagEntity {
         this.groupIDList = groupIDList;
         this.num = num;
         this.date = date;
+    }
+
+    public TagEntity(){}
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setGroupIDList(String groupIDList) {
+        this.groupIDList = groupIDList;
     }
 }

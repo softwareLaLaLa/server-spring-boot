@@ -19,10 +19,10 @@ public class MyUserDetailsService implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String s) throws UsernameNotFoundException {
         System.out.println("登录，用户名：" + s);
-        UserEntity systemUser = userDao.findByName(s);
-        if (systemUser == null) {
+        if (!userDao.existsByName(s)) {
             throw new UsernameNotFoundException("用户名不存在");
         }
+        UserEntity systemUser = userDao.findByName(s);
         //String password = new BCryptPasswordEncoder().encode(systemUser.getPassword());
         //System.out.println("加密后密码："+password);
         User user = new User(systemUser.getName(), systemUser.getPassword(),

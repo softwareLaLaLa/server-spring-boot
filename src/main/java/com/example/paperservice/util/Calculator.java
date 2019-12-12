@@ -1,10 +1,14 @@
 package com.example.paperservice.util;
 
+import com.example.paperservice.Entity.TagRela;
+
 import java.io.IOException;
 import java.lang.ProcessBuilder;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public class Calculator
 {
@@ -68,6 +72,63 @@ public class Calculator
 		}catch (Exception e){
 			e.printStackTrace();
 		}
+		return result;
+	}
+
+	//生成矩阵数据
+	//行为用户， 列为tag
+	public static List<List<Float>> getMatrixData(List<Map<Integer, TagRela>> mapList, Set<Integer> relativeSet){
+		float level = (float) 1;
+		System.out.println("关联tag："+relativeSet);
+		List<List<Float>> result = new ArrayList<>();
+		for(Map<Integer, TagRela> tagData: mapList){
+			System.out.println("论文Tag信息："+tagData);
+			List<Float> temp = new ArrayList<>();
+			for(Integer i: relativeSet){
+				if(tagData.containsKey(i)){
+					TagRela tagRela = tagData.get(i);
+					if(tagRela.getCorrelation()>level) {
+						temp.add(tagRela.getCorrelation());
+						continue;
+					}
+					else{
+						System.out.println("tag:"+i+"相关值过低！");
+						temp.add((float) 0);
+					}
+				}
+				System.out.println("paper tag:"+i+"相关数据为空");
+				temp.add((float) 0);
+			}
+			result.add(temp);
+		}
+		System.out.println("转化List数据结果："+result);
+		return result;
+	}
+
+	//行为用户， 列为group
+	public static List<List<Float>> getMatrixData2(List<Map<Integer, Float>> list, Set<Integer> relativeSet){
+		float level = (float) 1;
+		System.out.println("关联group："+relativeSet);
+		List<List<Float>> result = new ArrayList<>();
+		for(Map<Integer, Float> tagGroupData:list){
+			System.out.println("tagGroup信息："+tagGroupData);
+			List<Float> temp = new ArrayList<>();
+			for(Integer i: relativeSet){
+				if(tagGroupData.containsKey(i)){
+					Float value = tagGroupData.get(i);
+					if(value > level) {
+						temp.add(value);
+					}else{
+						System.out.println("tag:"+i+"相关值过低！");
+						temp.add((float)0);
+					}
+					continue;
+				}
+				System.out.println("group tag:"+i+"相关数据为空");
+				temp.add((float) 0);
+			}
+		}
+		System.out.println("转化List数据结果："+result);
 		return result;
 	}
 }

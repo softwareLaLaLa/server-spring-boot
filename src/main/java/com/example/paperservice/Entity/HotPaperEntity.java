@@ -41,4 +41,10 @@ public class HotPaperEntity {
         this.hot = hot;
         this.lastActiveTime = lastActiveTime;
     }
+
+    public HotPaperEntity(){}
+
+    public void setId(int id) {
+        this.id = id;
+    }
 }

@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
@@ -53,11 +54,14 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         //允许所有用户访问"/"和"/home"
         http.httpBasic()
                 .and()
+                .csrf().disable().exceptionHandling()
+                .and()
                 .authorizeRequests()
-                    .antMatchers("/signin","/init", "/home", "init2").permitAll()
-                    .antMatchers("/admin").hasAuthority("admin")
-                    //其他地址的访问均需验证权限
-                    .anyRequest().authenticated()
+                .antMatchers(HttpMethod.POST, "/signin", "/login").permitAll()
+                    //.antMatchers("/signin","/init", "/home", "init2").permitAll()
+                    //.antMatchers("/admin").hasAuthority("admin")
+                    //其他地址的访问均需验证权限(注意打包时需要修改)
+                    .anyRequest().permitAll()
                 .and()
                 .formLogin()
                     //指定登录页是"/login"

@@ -10,4 +10,5 @@ import javax.persistence.criteria.CriteriaBuilder;
 public interface UserDao extends JpaRepository<UserEntity, Integer> {
     UserEntity findById(int id);
     UserEntity findByName(String name);
+    boolean existsByName(String name);
 }

@@ -51,6 +51,15 @@ public class PaperSimpleData implements Serializable {
         this.tagList = tagList;
     }
 
+    public PaperSimpleData(int paper_id, String title, int totalBrowseNum, List<String> tagList){
+        this.paper_id = paper_id;
+        this.title = title;
+        this.totalBrowseNum = totalBrowseNum;
+        this.tagList = tagList;
+    }
+
+    public PaperSimpleData(){}
+
     int paper_id;
     String title;
     int totalBrowseNum;

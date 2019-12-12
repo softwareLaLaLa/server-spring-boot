@@ -1,14 +1,7 @@
 package com.example.paperservice.Entity;
 
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
-
 import javax.persistence.*;
-import java.lang.reflect.Type;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
-import java.util.Set;
 
 @Entity
 @Table(name = "evaluation")
@@ -18,11 +11,11 @@ public class EvalEntity {
     @Column(name = "id")
     private int id;
 
-    @Column(name = "usr_id")
-    private int usr_id;
+    @Column(name = "usrId")
+    private int usrId;
 
-    @Column(name = "paper_id")
-    private int paper_id;
+    @Column(name = "paperId")
+    private int paperId;
 
     @Column(name = "eval")
     private float eval;
@@ -41,12 +34,12 @@ public class EvalEntity {
         return id;
     }
 
-    public int getUsr_id() {
-        return usr_id;
+    public int getUsrid() {
+        return usrId;
     }
 
-    public int getPaper_id() {
-        return paper_id;
+    public int getPaperid() {
+        return paperId;
     }
 
     public float getEval() {
@@ -59,11 +52,35 @@ public class EvalEntity {
 //        return  gson.fromJson(tagIDList, dataListType);
 //    }
 
-    public EvalEntity(int usr_id, int paper_id, int eval, Date date) {
-        this.usr_id = usr_id;
-        this.paper_id = paper_id;
+    public EvalEntity(int usrid, int paperid, float eval, Date date) {
+        this.usrId = usrid;
+        this.paperId = paperid;
         this.eval = eval;
         //this.tagIDList = tagIDList;
         this.date = date;
     }
+
+    public EvalEntity(){}
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public void setUsrId(int usrId) {
+        this.usrId = usrId;
+    }
+
+    public void setPaperId(int paperId) {
+        this.paperId = paperId;
+    }
+
+    public void setEval(float eval) {
+        this.eval = eval;
+    }
+
+    public void setDate(Date date) {
+        this.date = date;
+    }
+
+    public void setDate(String date){this.date = new Date(date);}
 }

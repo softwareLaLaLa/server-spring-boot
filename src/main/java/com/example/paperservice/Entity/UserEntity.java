@@ -63,6 +63,28 @@ public class UserEntity {
         this.role = role;
     }
 
+    public UserEntity(){}
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public void setRole(String role) {
+        this.role = role;
+    }
+
+    public void setAvatar(String avatar) {
+        this.avatar = avatar;
+    }
+
     public void setCandidateGroup(String candidateGroup) {
         this.candidateGroup = candidateGroup;
     }

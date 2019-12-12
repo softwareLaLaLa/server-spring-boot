@@ -3,8 +3,8 @@ package com.example.paperservice.Entity;
 import java.util.List;
 
 public class BrowseHistory {
-    List<PaperSimpleData> browsePaperData;
     int usr_id;
+    List<PaperSimpleData> browsePaperData;
 
     public List<PaperSimpleData> getBrowsePaperData() {
         return browsePaperData;
@@ -22,7 +22,7 @@ public class BrowseHistory {
         this.usr_id = usr_id;
     }
 
-    public BrowseHistory(List<PaperSimpleData> browsePaperData, int usr_id) {
+    public BrowseHistory(int usr_id, List<PaperSimpleData> browsePaperData) {
         this.browsePaperData = browsePaperData;
         this.usr_id = usr_id;
     }

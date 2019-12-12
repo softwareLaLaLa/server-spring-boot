@@ -1,5 +1,5 @@
 server:
-  port: 8766
+  port: 8770
 
 eureka:
   client:
@@ -14,7 +14,7 @@ spring:
       password: 213100
       name: Yama
   datasource:
-    url: jdbc:mysql://localhost:3306/sfPaper?serverTimezone=GMT
+    url: jdbc:mysql://122.51.19.164:3306/paper_app?serverTimezone=GMT
     username: root
     password: Comfortalway1!
     driver-class-name: com.mysql.cj.jdbc.Driver

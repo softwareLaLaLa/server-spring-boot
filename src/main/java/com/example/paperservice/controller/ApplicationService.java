@@ -3,8 +3,8 @@ package com.example.paperservice.controller;
 import com.example.paperservice.Entity.*;
 import com.example.paperservice.PaperServiceApplication;
 import com.example.paperservice.util.MyPasswordEncoder;
+import com.google.gson.Gson;
 import com.netflix.discovery.converters.Auto;
-import org.graalvm.compiler.lir.LIRInstruction;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
@@ -34,6 +34,21 @@ public class ApplicationService {
         return true;
     }
 
+//    @PostMapping("/login")
+//    public boolean logIn(@RequestBody Map params) throws Exception {
+//        String name = (String) params.get("name");
+//        String password = (String) params.get("password");
+//        UserEntity systemUser = userService.getAuthData(name);
+//        if(systemUser == null){
+//            return false;
+//        }
+//        password = MyPasswordEncoder.getEncoder().encode(password);
+//        if(systemUser.getPassword().equals(password)){
+//            return true;
+//        }
+//        return false;
+//    }
+
     @GetMapping("/user-infor")
     @ResponseBody
     public UserInfor userInfor(Authentication authentication){
@@ -49,6 +64,8 @@ public class ApplicationService {
 
     @PostMapping("/evaluation-data")
     public void addEvalData(@RequestBody List<EvalEntity> evalEntityList){
+        Gson gson = new Gson();
+        System.out.println("加入评估数据" + gson.toJson(evalEntityList));
         recommendService.addEvalData(evalEntityList);
     }
 
@@ -73,5 +90,19 @@ public class ApplicationService {
     }
 
     @GetMapping("/paperData")
-    public PaperData getPaper(int paper_id){return recommendService.getPaperData(paper_id);}
+    public String getPaper(@RequestBody ID paper_id){
+        Gson gson = new Gson();
+        PaperData paperData = recommendService.getPaperData(paper_id.getId());
+        return gson.toJson(paperData);
+    }
+
+    @PostMapping("/user-data")
+    public void updateUserTag(@RequestBody ID user_id){
+        userService.refreshUserData(user_id.getId());
+    }
+
+    @GetMapping("/test")
+    public String test(){
+        return "test";
+    }
 }

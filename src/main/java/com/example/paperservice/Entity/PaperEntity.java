@@ -79,4 +79,6 @@ public class PaperEntity {
         this.evalNum = evalNum;
         this.uncheckNum = uncheckNum;
     }
+
+    public PaperEntity(){}
 }

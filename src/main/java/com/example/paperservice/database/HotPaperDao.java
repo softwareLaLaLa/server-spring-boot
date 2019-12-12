@@ -9,7 +9,7 @@ import java.util.List;
 
 @Repository
 public interface HotPaperDao extends JpaRepository<HotPaperEntity, Integer> {
-    List<HotPaperEntity> findTop20OrderByHotDesc();
+    List<HotPaperEntity> findTop20ByOrderByHotDesc();
     HotPaperEntity findById(int paper_id);
     void deleteHotPaperEntityByLastActiveTimeBefore(Date date);
     boolean existsById(int paper_id);

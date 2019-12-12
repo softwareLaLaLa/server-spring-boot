@@ -12,15 +12,14 @@ import java.util.*;
 @Repository
 public class RedisService {
     private static String PAPER_TAG_TABLE = "paperTag_";
-    static String PAPER_CLC_TABLE = "paperClick_";
+    //static String PAPER_CLC_TABLE = "paperClick_";
     static String GROUP_TAG_TABLE = "groupTag_";
     static String USER_TAG_TABLE = "userTag_";
-    static String USER_GROUP_TABLE = "userGroup_";
-    static String BRO_TABLE = "bro_";
+    //static String USER_GROUP_TABLE = "userGroup_";
+    static String BRO_TABLE = "broHis_";
     static String TAG_TABLE = "tag_";
 
     public static RedisService redisService;
-    public static int browseNum = 20;
 
     @PostConstruct
     public void init(){
@@ -42,18 +41,19 @@ public class RedisService {
         System.out.println("更新浏览记录："+ gson.toJson(getBrowseHistory(usr_id)));
     }
 
-    //tag表操作
-    //获取tag对应的论文群id
-    public List<Integer> getPaperGroupIDList(int tag_id){
-        return redisTemplate.opsForList().range(TAG_TABLE+tag_id, 0, -1);
-    }
-    //更新tag对应的论文群id
-    public void updatePaperGroup(int tag_id, Set<Integer> groupIDList){
-        String key = TAG_TABLE+tag_id;
-        redisTemplate.opsForList().trim(key, 0, 0);
-        System.out.println("删除tag对应papergroup数据："+redisTemplate.opsForList().size(key));
-        redisTemplate.opsForList().leftPushAll(key, groupIDList);
-    }
+    //该操作在mysql中实现
+//    //tag表操作
+//    //获取tag对应的论文群id
+//    public List<Integer> getPaperGroupIDList(int tag_id){
+//        return redisTemplate.opsForList().range(TAG_TABLE+tag_id, 0, -1);
+//    }
+//    //更新tag对应的论文群id
+//    public void updatePaperGroup(int tag_id, Set<Integer> groupIDList){
+//        String key = TAG_TABLE+tag_id;
+//        redisTemplate.opsForList().trim(key, 0, 0);
+//        System.out.println("删除tag对应papergroup数据："+redisTemplate.opsForList().size(key));
+//        redisTemplate.opsForList().leftPushAll(key, groupIDList);
+//    }
 
     //论文tag表操作
     //获取论文所有tag信息
@@ -83,14 +83,14 @@ public class RedisService {
     public void addPaperTagData(int paper_id, int tag_id, TagRela tr){
         redisTemplate.opsForHash().put(PAPER_TAG_TABLE+paper_id, tag_id, tr);
     }
-    public void deletePaperTagData(int paper_id, List<Integer> TagIdList){
+    public void deletePaperTagData(String paper_id, Set<Integer> TagIdList){
         for(Integer i: TagIdList){
             deletePaperTagData(paper_id, i);
         }
     }
     //为论文删除一个tag
-    public void deletePaperTagData(int paper_id, int tag_id){
-        redisTemplate.opsForHash().delete(PAPER_TAG_TABLE+paper_id, tag_id);
+    public void deletePaperTagData(String paper_id, int tag_id){
+        redisTemplate.opsForHash().delete(paper_id, tag_id);
     }
     public void updatePaperTagData(int paper_id, Set<Integer> tagID){
         for(Integer i: tagID){
@@ -166,26 +166,26 @@ public class RedisService {
     //周期性更新用户Tag信息
     public void refreshUserTagData(int usr_id, Map<Integer, Float> map){
         Set<Integer> idList = redisTemplate.opsForHash().keys(USER_TAG_TABLE + usr_id);
-        deleteUserTagData(usr_id, idList);
+        deleteUserTagData(USER_TAG_TABLE+usr_id, idList);
         addUserTagData(usr_id, map);
     }
-    public void deleteUserTagData(int usr_id, Set<Integer> TagIdList){
+    public void deleteUserTagData(String usr_id, Set<Integer> TagIdList){
         for(Integer i: TagIdList){
             deleteUserTagData(usr_id, i);
         }
     }
-    //为论文删除一个tag
-    public void deleteUserTagData(int usr_id, int tag_id){
-        redisTemplate.opsForHash().delete(USER_TAG_TABLE + usr_id, tag_id);
+    //为用户删除一个tag
+    public void deleteUserTagData(String usr_id, int tag_id){
+        redisTemplate.opsForHash().delete(usr_id, tag_id);
     }
     public void addUserTagData(int usr_id, Map<Integer, Float> map){
         redisTemplate.opsForHash().putAll(USER_TAG_TABLE+usr_id, map);
     }
-    //为论文添加一个tag
-    public void addUserTagData(int usr_id, int tag_id, Float value){
-        redisTemplate.opsForHash().put(USER_TAG_TABLE+usr_id, tag_id, value);
-        System.out.println("为用户添加Tag: "+ ((TagRela)redisTemplate.opsForHash().get(USER_TAG_TABLE+usr_id, tag_id)));
-    }
+//    //为论文添加一个tag
+//    public void addUserTagData(int usr_id, int tag_id, Float value){
+//        redisTemplate.opsForHash().put(USER_TAG_TABLE+usr_id, tag_id, value);
+//        System.out.println("为用户添加Tag: "+ ((TagRela)redisTemplate.opsForHash().get(USER_TAG_TABLE+usr_id, tag_id)));
+//    }
     //获取全部tag信息
     public Map<Integer, Float> getUserTagData(int usr_id){
         Set<Integer> keys = redisTemplate.opsForHash().keys(USER_TAG_TABLE+usr_id);
@@ -205,26 +205,45 @@ public class RedisService {
         return map;
     }
 
-    //用户评价论文后即时更新
-    //输入tag_id为key,w(Date, eval)为value的map
-    public void updateUserTagData(int usr_id, Map<Integer, Float> map){
-        for(Map.Entry<Integer, Float> entry:map.entrySet()){
-            updateUserTagData(usr_id, entry.getKey(), entry.getValue());
+//    //用户评价论文后即时更新
+//    //输入tag_id为key,w(Date, eval)为value的map
+//    public void updateUserTagData(int usr_id, Map<Integer, Float> map){
+//        for(Map.Entry<Integer, Float> entry:map.entrySet()){
+//            updateUserTagData(usr_id, entry.getKey(), entry.getValue());
+//        }
+//    }
+//    public void updateUserTagData(int usr_id, int tag_id, float value){
+//        TagRela tagRela = null;
+//        if(!redisTemplate.opsForHash().hasKey(USER_TAG_TABLE+usr_id, tag_id)){
+//            System.out.println("用户没有该Tag："+tag_id);
+//            addUserTagData(usr_id, tag_id, value);
+//            return;
+//        }else{
+//            tagRela = (TagRela)redisTemplate.opsForHash().get(USER_TAG_TABLE+usr_id, tag_id);
+//        }
+//        value = (tagRela.getTag_num()*tagRela.getCorrelation()+value)/(tagRela.getTag_num()+1);
+//        deleteUserTagData(usr_id, tag_id);
+//        addUserTagData(usr_id, tag_id, value);
+//    }
+
+    public void deleteTagData(Set<Integer> tagIDList){
+        Set<String> userSet = redisTemplate.keys(USER_TAG_TABLE);
+        Set<String> paperSet = redisTemplate.keys(PAPER_TAG_TABLE);
+        Set<String> groupSet = redisTemplate.keys(GROUP_TAG_TABLE);
+        System.out.println("userSet:"+ userSet);
+        System.out.println("paperSet:"+ paperSet);
+        System.out.println("groupSet:"+ groupSet);
+
+        for(String userKey: userSet){
+            deleteUserTagData(userKey, tagIDList);
+        }
+
+        for(String paperKey :paperSet){
+            deletePaperTagData(paperKey, tagIDList);
+        }
+
+        for(String groupKey :groupSet){
+            deleteGroupTagData(groupKey, tagIDList);
         }
     }
-    public void updateUserTagData(int usr_id, int tag_id, float value){
-        TagRela tagRela = null;
-        if(!redisTemplate.opsForHash().hasKey(USER_TAG_TABLE+usr_id, tag_id)){
-            System.out.println("用户没有该Tag："+tag_id);
-            addUserTagData(usr_id, tag_id, value);
-            return;
-        }else{
-            tagRela = (TagRela)redisTemplate.opsForHash().get(USER_TAG_TABLE+usr_id, tag_id);
-        }
-        value = (tagRela.getTag_num()*tagRela.getCorrelation()+value)/(tagRela.getTag_num()+1);
-        deleteUserTagData(usr_id, tag_id);
-        addUserTagData(usr_id, tag_id, value);
-    }
-
-
 }
