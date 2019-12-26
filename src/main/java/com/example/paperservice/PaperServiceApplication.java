@@ -1,10 +1,12 @@
 package com.example.paperservice;
 
+import com.example.paperservice.controller.DataInit;
 import com.example.paperservice.controller.RecommendService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.netflix.eureka.EnableEurekaClient;
+import org.springframework.context.ApplicationContext;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.concurrent.Executors;
@@ -16,25 +18,28 @@ import java.util.concurrent.TimeUnit;
 @SpringBootApplication
 public class PaperServiceApplication {
 
-    @Autowired
-    static RecommendService recommendService;
-
     public static void main(String[] args) {
-        SpringApplication.run(PaperServiceApplication.class, args);
+        ApplicationContext context = SpringApplication.run(PaperServiceApplication.class, args);
+        DataInit datainit = context.getBean(DataInit.class);
+        RecommendService recommendService = context.getBean(RecommendService.class);
+        Boolean init = true;
+        if(init==false) {
+            datainit.initData();
+        }
         ScheduledExecutorService service1 = Executors.newSingleThreadScheduledExecutor();
         service1.scheduleAtFixedRate(new Runnable() {
             @Override
             public void run() {
                 recommendService.refreshHotPaperData();
             }
-        }, 0, 1, TimeUnit.DAYS);
+        }, 1, 1, TimeUnit.DAYS);
         ScheduledExecutorService service2 = Executors.newSingleThreadScheduledExecutor();
         service2.scheduleAtFixedRate(new Runnable() {
             @Override
             public void run() {
                 recommendService.freshTagData();
             }
-        }, 0, 1, TimeUnit.DAYS);
+        }, 1, 1, TimeUnit.DAYS);
         ScheduledExecutorService service3 = Executors.newSingleThreadScheduledExecutor();
         service3.scheduleAtFixedRate(new Runnable() {
             @Override

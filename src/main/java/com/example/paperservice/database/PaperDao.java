@@ -12,6 +12,7 @@ import java.util.List;
 public interface PaperDao extends JpaRepository<PaperEntity, Integer> {
     PaperEntity findById(int id);
     boolean existsById(int id);
-    List<PaperEntity> findByIdBetweenOrderByBrowseNumDesc(int low, int high, Pageable pageable);
+    List<PaperEntity> findByGroupIDEqualsOrderByBrowseNumDesc(int groupID, Pageable pageable);
+    //List<PaperEntity> findByIdBetweenOrderByBrowseNumDesc(int low, int high, Pageable pageable);
     List<PaperEntity> findAll();
 }

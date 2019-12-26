@@ -51,8 +51,7 @@ public class ApplicationService {
 
     @GetMapping("/user-infor")
     @ResponseBody
-    public UserInfor userInfor(Authentication authentication){
-        String name = authentication.getName();
+    public UserInfor userInfor(String name){
         System.out.println("usr name = " + name);
         return userService.getUserInforByUserName(name);
     }
@@ -94,6 +93,11 @@ public class ApplicationService {
         Gson gson = new Gson();
         PaperData paperData = recommendService.getPaperData(paper_id.getId());
         return gson.toJson(paperData);
+    }
+
+    @PostMapping("/user-tag")
+    public void initUserTag(@RequestBody ID usrId, @RequestBody Map<Integer, Float> tagData){
+        userService.initUserTag(usrId.getId(), tagData);
     }
 
     @PostMapping("/user-data")

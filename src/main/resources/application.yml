@@ -1,11 +1,6 @@
 server:
   port: 8770
 
-eureka:
-  client:
-    serviceUrl:
-      defaultZone: http://localhost:8761/eureka/
-
 spring:
   application:
     name: usr-service
@@ -28,5 +23,5 @@ spring:
         max-active: 8
         max-wait: 1
         min-idle: 0
-    timeout: 50
+    timeout: 500
     password:

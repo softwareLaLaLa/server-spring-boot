@@ -143,6 +143,7 @@ public class RedisService {
         return redisTemplate.opsForHash().multiGet(group_id, tagIDList);
     }
     public void refreshGroupTagData(Map<Integer, Map<Integer, Float>> map){
+        System.out.println("更新group的tag数据"+map);
         for(Object id: redisTemplate.keys(GROUP_TAG_TABLE+"*")) {
             String group_id = (String) id;
             Set<Integer> idList = redisTemplate.opsForHash().keys(group_id);

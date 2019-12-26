@@ -31,6 +31,9 @@ public class PaperEntity {
     @Column(name = "uncheckNum")
     private int uncheckNum;
 
+    @Column(name = "groupId")
+    private int groupId;
+
     public int getUncheckNum() {
         return uncheckNum;
     }
@@ -69,6 +72,24 @@ public class PaperEntity {
 
     public void setUncheckNum(int uncheckNum) {
         this.uncheckNum = uncheckNum;
+    }
+
+    public int getGroupID() {
+        return groupId;
+    }
+
+    public void setGroupID(int groupId) {
+        this.groupId = groupId;
+    }
+
+    public PaperEntity(String title, String abst, String resUrl, int browseNum, int evalNum, int uncheckNum, int groupID) {
+        this.title = title;
+        this.abst = abst;
+        this.resUrl = resUrl;
+        this.browseNum = browseNum;
+        this.evalNum = evalNum;
+        this.uncheckNum = uncheckNum;
+        this.groupId = groupID;
     }
 
     public PaperEntity(String title, String abst, String resUrl, int browseNum, int evalNum, int uncheckNum) {

@@ -157,7 +157,8 @@ public class UserService {
         userDao.save(userEntity);
     }
 
-    private void clusterPapers(){
-
+    //初始化用户tag信息
+    public void initUserTag(int usrId, Map<Integer, Float> tagData){
+        redisService.addUserTagData(usrId, tagData);
     }
 }

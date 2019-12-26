@@ -1,5 +1,6 @@
 package com.example.paperservice.util;
 
+import com.example.paperservice.Entity.GroupData;
 import com.example.paperservice.Entity.TagRela;
 
 import java.io.IOException;
@@ -78,7 +79,7 @@ public class Calculator
 	//生成矩阵数据
 	//行为用户， 列为tag
 	public static List<List<Float>> getMatrixData(List<Map<Integer, TagRela>> mapList, Set<Integer> relativeSet){
-		float level = (float) 1;
+		float level = (float) 0.1;
 		System.out.println("关联tag："+relativeSet);
 		List<List<Float>> result = new ArrayList<>();
 		for(Map<Integer, TagRela> tagData: mapList){
@@ -107,7 +108,7 @@ public class Calculator
 
 	//行为用户， 列为group
 	public static List<List<Float>> getMatrixData2(List<Map<Integer, Float>> list, Set<Integer> relativeSet){
-		float level = (float) 1;
+		float level = (float) 0.1;
 		System.out.println("关联group："+relativeSet);
 		List<List<Float>> result = new ArrayList<>();
 		for(Map<Integer, Float> tagGroupData:list){
@@ -130,5 +131,126 @@ public class Calculator
 		}
 		System.out.println("转化List数据结果："+result);
 		return result;
+	}
+
+	public static GroupData Cluster(List<List<Float>> allPaperTags) {
+		String tagNum = String.valueOf(allPaperTags.get(0).size()); // ��ǩ������
+		String paperNum = String.valueOf(allPaperTags.size()); // ��������
+
+		int clusterNums = 15;
+		String clusterNum = String.valueOf(clusterNums); // ����group��
+		String baseCommand = "python KMeans.py ";
+		String commandStr = new String(
+				clusterNum + " " + tagNum + " " + paperNum);
+		// �����ĵ�tag���ӵ�������
+		for (List<Float> paperTags : allPaperTags) {
+			for (float tag : paperTags) {
+				String s = String.valueOf(tag);
+				commandStr = commandStr + " " + s;
+			}
+		}
+
+		System.out.println("Have created the command, paperNums = " + paperNum + " tagNums = " + tagNum
+				+ " clusterNums = " + clusterNum);
+		String filePath = "clusterData.txt";
+		try{
+			File file = new File(filePath);
+			PrintStream ps = new PrintStream(new FileOutputStream(file));
+			ps.println(commandStr);
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		}
+		//commandStr = baseCommand + commandStr;
+		Process pr = null;
+		try {
+			pr = Runtime.getRuntime().exec(baseCommand);
+		} catch (IOException e1) {
+			e1.printStackTrace();
+		}
+
+		BufferedReader in = new BufferedReader(new InputStreamReader(pr.getInputStream()));
+//		BufferedReader stdError = new BufferedReader(new InputStreamReader(pr.getErrorStream()));
+		String line = null;
+//		String errorLine = null;
+//		//   ȡgroup
+//		try {
+//			while((errorLine = stdError.readLine())!=null) {
+//
+//				System.out.println(errorLine);
+//			}
+//		} catch (IOException e1) {
+//			// TODO 自动生成的 catch 块
+//			e1.printStackTrace();
+//		}
+		List<List<Integer>> groupPapers = new ArrayList<>();
+		System.out.println("Now cluster the papers into groups");
+		for (int i = 0; i < clusterNums; i++) {
+			System.out.println("Group" + i + ": ");
+			try {
+				System.out.println("获取聚类算法输出");
+				line = in.readLine();
+				System.out.println("获取成功，line="+line);
+				List<Integer> aGroup = new ArrayList<>();
+				String[] papers = line.split(" ");
+				System.out.println("Group" + i + "对应paper个数" + papers.length);
+				for (String paper : papers) {
+					System.out.print(paper + " ");
+					aGroup.add(Integer.valueOf(paper));
+				}
+				groupPapers.add(aGroup);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+		System.out.println("");
+		// ��ȡgroup������tag��ض�
+		List<List<Float>> groupTags = new ArrayList<>();
+		System.out.println("Now cluster the tags into groups");
+		for (int i = 0; i < clusterNums; i++) {
+			System.out.println("Group" + String.valueOf(i) + ": ");
+			try {
+				line = in.readLine();
+				ArrayList<Float> aGroup = new ArrayList<>();
+				String[] tags = line.split(" ");
+				for (String tag : tags) {
+					System.out.print(tag + " ");
+					aGroup.add(Float.valueOf(tag));
+				}
+				groupTags.add(aGroup);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+		System.out.println("");
+		// ��ȡÿ��tag���ڵ�group
+		List<List<Integer>> tagInGroup = new ArrayList<>();
+		System.out.println("Now see the tags in which groups");
+		int tagNums = allPaperTags.get(0).size();
+		for (int i = 0; i < tagNums; i++) {
+			System.out.println("Tag" + String.valueOf(i) + ": ");
+			try {
+				line = in.readLine();
+				ArrayList<Integer> aTag = new ArrayList<>();
+				String[] groups = line.split(" ");
+				for (String group : groups) {
+					System.out.print(group + " ");
+					aTag.add(Integer.valueOf(group));
+				}
+				tagInGroup.add(aTag);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+		System.out.println("");
+		// System.out.println(line);
+		try {
+			in.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		pr.destroy();
+
+		GroupData groupData = new GroupData(groupPapers, groupTags, tagInGroup);
+		return groupData;
 	}
 }
