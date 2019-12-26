@@ -46,7 +46,7 @@ public class PaperServiceApplication {
             public void run() {
                 recommendService.clusterPaper();
             }
-        }, 0, 30, TimeUnit.DAYS);
+        }, 10, 30, TimeUnit.DAYS);
     }
 
 }

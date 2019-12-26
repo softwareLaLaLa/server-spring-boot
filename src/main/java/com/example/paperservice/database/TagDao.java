@@ -16,4 +16,5 @@ public interface TagDao extends JpaRepository<TagEntity, Integer> {
     List<TagEntity> findByDateBeforeAndNumLessThan(Date date, int num);
     //void deleteAllById(List<Integer> idList);
     //public boolean existsById(int id);
+    List<TagEntity> findAll();
 }

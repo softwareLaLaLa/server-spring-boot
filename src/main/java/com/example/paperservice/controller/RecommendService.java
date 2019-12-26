@@ -101,7 +101,7 @@ public class RecommendService {
     }
 
     //添加用户浏览信息，可以用队列实现
-    public boolean addBrowseNumForPaper(int paper_id){
+     private boolean addBrowseNumForPaper(int paper_id){
         //更新论文数据
         if(!paperDao.existsById(paper_id)){
             System.out.println("不存在该论文！");
@@ -312,5 +312,13 @@ public class RecommendService {
         }
         redisService.refreshGroupTagData(groupsData);
         System.out.println("聚类结束");
+    }
+
+    public List<TagSimpleData> getTagData(){
+        List<TagSimpleData> tagSimpleDataList = new ArrayList<>();
+        for(TagEntity tagEntity: tagDao.findAll()){
+            tagSimpleDataList.add(new TagSimpleData(tagEntity));
+        }
+        return tagSimpleDataList;
     }
 }

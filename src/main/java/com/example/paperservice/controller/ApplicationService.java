@@ -50,8 +50,7 @@ public class ApplicationService {
 //    }
 
     @GetMapping("/user-infor")
-    @ResponseBody
-    public UserInfor userInfor(String name){
+    public UserInfor userInfor(@RequestParam String name){
         System.out.println("usr name = " + name);
         return userService.getUserInforByUserName(name);
     }
@@ -96,13 +95,18 @@ public class ApplicationService {
     }
 
     @PostMapping("/user-tag")
-    public void initUserTag(@RequestBody ID usrId, @RequestBody Map<Integer, Float> tagData){
-        userService.initUserTag(usrId.getId(), tagData);
+    public void initUserTag(InitialUserTagData userTagData){
+        userService.initUserTag(userTagData.getUsr_id(), userTagData.getTagData());
     }
 
     @PostMapping("/user-data")
     public void updateUserTag(@RequestBody ID user_id){
         userService.refreshUserData(user_id.getId());
+    }
+
+    @GetMapping("/tag-data")
+    public List<TagSimpleData> getTagData(){
+        return recommendService.getTagData();
     }
 
     @GetMapping("/test")
