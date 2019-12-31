@@ -7,7 +7,6 @@ import java.util.Date;
 @Table(name = "paperHotData")
 public class HotPaperEntity {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private int id;
 
@@ -37,7 +36,8 @@ public class HotPaperEntity {
         return id;
     }
 
-    public HotPaperEntity(int hot, Date lastActiveTime) {
+    public HotPaperEntity(int id, int hot, Date lastActiveTime) {
+        this.id = id;
         this.hot = hot;
         this.lastActiveTime = lastActiveTime;
     }

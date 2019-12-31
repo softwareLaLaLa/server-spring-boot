@@ -1,6 +1,7 @@
 package com.example.paperservice.database;
 
 import com.example.paperservice.Entity.PaperEntity;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -12,7 +13,8 @@ import java.util.List;
 public interface PaperDao extends JpaRepository<PaperEntity, Integer> {
     PaperEntity findById(int id);
     boolean existsById(int id);
-    List<PaperEntity> findByGroupIDEqualsOrderByBrowseNumDesc(int groupID, Pageable pageable);
+    //List<PaperEntity> findByGroupId
+    Page<PaperEntity> findByGroupId(int groupID, Pageable pageable);
     //List<PaperEntity> findByIdBetweenOrderByBrowseNumDesc(int low, int high, Pageable pageable);
     List<PaperEntity> findAll();
 }

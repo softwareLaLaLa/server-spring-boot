@@ -22,8 +22,7 @@ public class PaperServiceApplication {
         ApplicationContext context = SpringApplication.run(PaperServiceApplication.class, args);
         DataInit datainit = context.getBean(DataInit.class);
         RecommendService recommendService = context.getBean(RecommendService.class);
-        Boolean init = true;
-        if(init==false) {
+        if(false) {
             datainit.initData();
         }
         ScheduledExecutorService service1 = Executors.newSingleThreadScheduledExecutor();

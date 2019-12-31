@@ -10,6 +10,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -50,9 +51,12 @@ public class ApplicationService {
 //    }
 
     @GetMapping("/user-infor")
-    public UserInfor userInfor(@RequestParam String name){
+    public String userInfor(@RequestParam String name){
         System.out.println("usr name = " + name);
-        return userService.getUserInforByUserName(name);
+        Gson gson = new Gson();
+        UserInfor userInfor = userService.getUserInforByUserName(name);
+        System.out.println("user infor: "+ gson.toJson(userInfor));
+        return gson.toJson(userInfor);
     }
 
     @PostMapping("/browse-history")
@@ -77,8 +81,9 @@ public class ApplicationService {
         recommendService.addNewTagsData(paperNewTagMap);
     }
 
-    @GetMapping("/recommend-paper")
-    public List<PaperSimpleData> getRecommendpaper(@RequestBody Map<Integer, Integer> groupMap){
+    @PostMapping("/recommend-paper")
+    public Map<Integer,List<PaperSimpleData>> getRecommendpaper(@RequestBody Map<Integer, Integer> groupMap){
+        System.out.println("获取group："+groupMap + "对应论文");
         return recommendService.getRecommendPaper(groupMap);
     }
 
@@ -88,15 +93,15 @@ public class ApplicationService {
     }
 
     @GetMapping("/paperData")
-    public String getPaper(@RequestBody ID paper_id){
+    public String getPaper(@RequestParam int paper_id){
         Gson gson = new Gson();
-        PaperData paperData = recommendService.getPaperData(paper_id.getId());
+        PaperData paperData = recommendService.getPaperData(paper_id);
         return gson.toJson(paperData);
     }
 
     @PostMapping("/user-tag")
-    public void initUserTag(InitialUserTagData userTagData){
-        userService.initUserTag(userTagData.getUsr_id(), userTagData.getTagData());
+    public Set<Integer> initUserTag(@RequestBody InitialUserTagData userTagData){
+        return userService.initUserTag(userTagData.getUsr_id(), userTagData.getTagData());
     }
 
     @PostMapping("/user-data")

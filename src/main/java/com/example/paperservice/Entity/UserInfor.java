@@ -39,6 +39,14 @@ public class UserInfor {
         return usr_id;
     }
 
+    public void setGroupID(List<Integer> groupID) {
+        this.groupID = groupID;
+    }
+
+    public void setCandidateGroupID(List<Integer> candidateGroupID) {
+        this.candidateGroupID = candidateGroupID;
+    }
+
     public String getName() {
         return name;
     }

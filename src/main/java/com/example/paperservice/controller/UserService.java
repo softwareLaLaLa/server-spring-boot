@@ -27,6 +27,8 @@ public class UserService {
     private TagDao tagDao;
     @Autowired
     private EvaluationDao evaluationDao;
+    @Autowired
+    private RecommendService recommendService;
 
     public UserInfor getUserInforByUserName(String name){
         UserEntity userEntity = userDao.findByName(name);
@@ -111,8 +113,9 @@ public class UserService {
             Map<Integer, Float> userTagMap = new HashMap<>();
             for(Integer tagID :relativeTag){
                 //System.out.println("更新前tag数据："+entry);
-                userTagMap.put(tagID, newValueList.get(count++));
-                System.out.println("更新后tag数据： id="+tagID + "relation = "+newValueList.get(count++));
+                userTagMap.put(tagID, newValueList.get(count));
+                System.out.println("更新后tag数据： id="+tagID + "relation = "+newValueList.get(count));
+                ++count;
             }
             redisService.refreshUserTagData(usr_id, userTagMap);
         }
@@ -120,8 +123,10 @@ public class UserService {
 
     //计算用户group关联信息
     private void setUserGroupData(int usr_id){
+        System.out.println("设置用户group信息");
         Gson gson = new Gson();
         Map<Integer, Float> usrTagDataMap = redisService.getUserTagData(usr_id);
+        System.out.println("用户tag信息："+usrTagDataMap);
         List<Float> usrTagRel = new ArrayList<>();
         List<Map<Integer, Float>> tagList = new ArrayList<>();
         Set<Integer> relativeGroup = new HashSet<>();
@@ -130,10 +135,15 @@ public class UserService {
             Type listType = new TypeToken<ArrayList<Integer>>(){}.getType();
             TagEntity tagEntity = tagDao.findById((int)entry.getKey());
             List<Integer> groupIDList = gson.fromJson(tagEntity.getGroupIDList(), listType);
+            System.out.println("tag："+ entry.getKey()+" 对应group"+groupIDList);
             tagList.add(redisService.getGroupTagData(groupIDList, tagEntity.getId()));
             relativeGroup.addAll(groupIDList);
         }
+
+
         List<List<Float>> newValueList = getMatrixData2(tagList, relativeGroup);
+        System.out.println("tag relation 矩阵："+usrTagRel);
+        System.out.println("整合矩阵："+newValueList);
         //对每个group的感兴趣程度
         List<Float> newUserValueGroupValue = Calculator.multiple(usrTagRel, newValueList);
         Collections.sort(newUserValueGroupValue);
@@ -145,7 +155,7 @@ public class UserService {
         int count = 0;
         for(Integer groupID: relativeGroup){
             float value = newUserValueGroupValue.get(count++);
-            if(value <= border){
+            if(value < border){
                 candidateGroup.add(groupID);
             }else{
                 favorGroup.add(groupID);
@@ -158,7 +168,13 @@ public class UserService {
     }
 
     //初始化用户tag信息
-    public void initUserTag(int usrId, Map<Integer, Float> tagData){
+    public Set<Integer> initUserTag(int usrId, Map<Integer, Float> tagData){
         redisService.addUserTagData(usrId, tagData);
+        Set<Integer> groupId = recommendService.getTagGroup(tagData.keySet());
+        UserEntity userEntity = userDao.findById(usrId);
+        Gson gson = new Gson();
+        userEntity.setGroup(gson.toJson(groupId));
+        userDao.save(userEntity);
+        return groupId;
     }
 }

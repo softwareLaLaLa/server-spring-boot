@@ -58,11 +58,12 @@ public class Calculator
 	public static float divide(List<Float> valueList){
 		float result = -1;
 		int length = valueList.size();
-		String commandStr = new String("python matrixCalcu.py " + length);
+		String commandStr = new String("python divideGroup.py " + length);
 		for (Float f : valueList) {
 			commandStr = commandStr + " " + f;
 		}
 		try {
+			System.out.println("divide group commander:"+commandStr);
 			Process pr = Runtime.getRuntime().exec(commandStr);
 			BufferedReader in = new BufferedReader(new InputStreamReader(pr.getInputStream()));
 			String line = null;
@@ -128,6 +129,7 @@ public class Calculator
 				System.out.println("group tag:"+i+"相关数据为空");
 				temp.add((float) 0);
 			}
+			result.add(temp);
 		}
 		System.out.println("转化List数据结果："+result);
 		return result;

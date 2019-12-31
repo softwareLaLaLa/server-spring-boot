@@ -18,4 +18,12 @@ public class InitialUserTagData {
     public Map<Integer, Float> getTagData() {
         return tagData;
     }
+
+    public void setUsr_id(int usr_id) {
+        this.usr_id = usr_id;
+    }
+
+    public void setTagData(Map<Integer, Float> tagData) {
+        this.tagData = tagData;
+    }
 }

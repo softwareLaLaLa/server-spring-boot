@@ -1,14 +1,20 @@
 package com.example.paperservice.controller;
 
 import com.example.paperservice.Entity.*;
+import com.example.paperservice.PaperServiceApplication;
 import com.example.paperservice.database.*;
 import com.example.paperservice.util.Calculator;
 import com.google.gson.Gson;
+import com.google.gson.internal.$Gson$Preconditions;
+import com.google.gson.reflect.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
 
 import java.awt.print.Paper;
+import java.lang.reflect.Type;
 import java.util.*;
 
 import static com.example.paperservice.util.Calculator.getMatrixData;
@@ -115,12 +121,13 @@ public class RecommendService {
         HotPaperEntity hotPaperEntity = null;
         if(!hotPaperDao.existsById(paper_id)){
             System.out.println("该论文不在热榜中！");
-            hotPaperEntity = new HotPaperEntity(0, null);
+            hotPaperEntity = new HotPaperEntity(paper_id, 0, null);
         }else{
             hotPaperEntity = hotPaperDao.findById(paper_id);
         }
         hotPaperEntity.setHot(hotPaperEntity.getHot()+1);
         hotPaperEntity.setLastActiveTime(new Date());
+
         hotPaperDao.save(hotPaperEntity);
         return true;
     }
@@ -157,28 +164,34 @@ public class RecommendService {
 
     //获取推荐论文
     //参数key对应groupID, value对应要获取的数量
-    public List<PaperSimpleData> getRecommendPaper(Map<Integer, Integer> groupMap){
+    public Map<Integer, List<PaperSimpleData>> getRecommendPaper(Map<Integer, Integer> groupMap){
         //int groupPaperNum = 1000;
         int pageSize = 5;
-        List<PaperSimpleData> result = new ArrayList<>();
+        Map<Integer, List<PaperSimpleData>> result = new HashMap<>();
         for(Map.Entry<Integer,Integer> entry: groupMap.entrySet()){
             int group_id = entry.getKey();
-            List<PaperEntity> paperList = paperDao.findByGroupIDEqualsOrderByBrowseNumDesc(group_id, PageRequest.of(entry.getValue(), pageSize));
+            //System.out.println()
+            List<PaperEntity> paperList = paperDao.findByGroupId(group_id, PageRequest.of(entry.getValue(), pageSize, Sort.by(Sort.Direction.DESC, "browseNum"))).getContent();
+            System.out.println("groupid:"+group_id+"对应论文篇数："+paperList.size());
+            List<PaperSimpleData> paperSimpleDataList = new ArrayList<>();
             for(PaperEntity paperEntity: paperList){
                 Map<Integer, TagRela> tagRelaMap = redisService.getPaperTagData(paperEntity.getId());
                 List<String> tagList = new ArrayList<>();
                 for(Integer i: tagRelaMap.keySet()){
                     tagList.add(tagDao.findById((int)i).getName());
                 }
-                result.add(new PaperSimpleData(paperEntity, tagList));
+
+                paperSimpleDataList.add(new PaperSimpleData(paperEntity, tagList));
             }
+            result.put(group_id, paperSimpleDataList);
         }
+        System.out.println("推荐论文数量："+result.size());
         return result;
     }
 
     //获取论文推荐tag
     public List<List<TagSimpleData>> getRecommendTag(int paper_id){
-        float validity1 = (float)0.3; float validity2 = (float) 0.85;
+        float validity1 = (float)0.01; float validity2 = (float) 0.1;
         Gson gson = new Gson();
         Map<Integer, TagRela> tagRelaMap = redisService.getPaperTagData(paper_id);
         System.out.println("论文:"+paper_id+" 对应tag信息："+gson.toJson(tagRelaMap));
@@ -268,10 +281,12 @@ public class RecommendService {
         //更新paperID
         System.out.println("更新paper");
         for(List<Integer> paperNumberList :groupPaperIDList){
+            System.out.println("groupid:"+groupID + "对应paper"+paperNumberList);
             for(Integer paperNumber: paperNumberList) {
                 int paperID = paperIDList.get(paperNumber);
                 PaperEntity paperEntity = paperDao.findById(paperID);
                 paperEntity.setGroupID(groupID);
+                paperDao.save(paperEntity);
             }
             ++groupID;
         }
@@ -280,7 +295,7 @@ public class RecommendService {
         //决定是否保留groupTag信息
         final float lowest = (float)0.01;
         //决定是否保留TagGroup信息
-        final float lowest2 = (float)1;
+        final float lowest2 = (float)0.5;
         groupID = 0;
         for(List<Float> tagRelation :groupTagRelationList){
             int count = 0;
@@ -290,7 +305,7 @@ public class RecommendService {
                 Float value = tagRelation.get(count++);
                 if(value < lowest){
                     continue;
-                }else if (value < lowest2){
+                }else if(value >lowest2){
                     if(tagGroupData.containsKey(tagID)){
                         tagGroupData.get(tagID).add(groupID);
                     }else{
@@ -306,7 +321,7 @@ public class RecommendService {
         for(Map.Entry<Integer, List<Integer>> tagGroupDataEntry:tagGroupData.entrySet()){
             TagEntity tagEntity = tagDao.findById((int)tagGroupDataEntry.getKey());
             Gson gson = new Gson();
-            System.out.println("tag:"+tagEntity.getName()+" 对应的groupID:"+tagGroupDataEntry.getValue());
+            System.out.println("tag:"+tagEntity.getId()+" "+tagEntity.getName()+" 对应的groupID:"+tagGroupDataEntry.getValue());
             tagEntity.setGroupIDList(gson.toJson(tagGroupDataEntry.getValue()));
             tagDao.save(tagEntity);
         }
@@ -320,5 +335,20 @@ public class RecommendService {
             tagSimpleDataList.add(new TagSimpleData(tagEntity));
         }
         return tagSimpleDataList;
+    }
+
+    public Set<Integer> getTagGroup(Set<Integer> tagIDSet){
+        System.out.println("获取tagSet:" +tagIDSet+"对应group");
+        Set<Integer> groupIdSet = new HashSet<>();
+        Type dataListType = new TypeToken<ArrayList<Integer>>(){}.getType();
+        Gson gson = new Gson();
+        for(Integer tagId: tagIDSet){
+            TagEntity tagEntity = tagDao.findById((int)tagId);
+            List<Integer> groupIdList = gson.fromJson(tagEntity.getGroupIDList(), dataListType);
+            System.out.println("tagID："+tagId+ "对应的group为："+groupIdList);
+            groupIdSet.addAll(groupIdList);
+        }
+        System.out.println("tagID："+tagIDSet+ "对应的group为："+groupIdSet);
+        return groupIdSet;
     }
 }

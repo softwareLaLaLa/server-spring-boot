@@ -45,14 +45,16 @@ public class DataInit {
             // Create and insert tags
             for (int i = 0; i < tags.length - 1; i++) {
                 // Prevent duplicate inserts of tags
-                if (existTags.contains(tags[i])) {
-                    continue;
+                TagEntity aTag = null;
+                if (!existTags.contains(tags[i])) {
+                    existTags.add(tags[i]);
+                    aTag = new TagEntity(tags[i], "", 1, new Date());
+                    System.out.println("Now insert the tag: " + tags[i]);
+                    tagDao.save(aTag);
+                }else{
+                    aTag = tagDao.findByName(tags[i]);
                 }
-                existTags.add(tags[i]);
-                TagEntity aTag = new TagEntity(tags[i], "", 1, new Date());
 
-                System.out.println("Now insert the tag: " + tags[i]);
-                tagDao.save(aTag);
                 Random random = new Random();
                 float value = random.nextInt(4);
                 value = (value + 8) / 10;
@@ -73,7 +75,7 @@ public class DataInit {
                     for (String paper : papers) {
                         // Split the title, download link and abstract of each paper
                         String[] infos = paper.split("@");
-                        System.out.println("划分结果个数："+infos.length);
+                        //System.out.println("划分结果个数："+infos.length);
                         if(infos[2].length()>1500) {
                             infos[2] = infos[2].substring(0, 1500);
                         }
