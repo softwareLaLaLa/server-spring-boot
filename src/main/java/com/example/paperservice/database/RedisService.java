@@ -1,6 +1,7 @@
 package com.example.paperservice.database;
 
-import com.example.paperservice.Entity.*;
+import com.example.paperservice.DataProcess.PaperSimpleData;
+import com.example.paperservice.DataProcess.TagRela;
 import com.google.gson.Gson;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -76,12 +77,21 @@ public class RedisService {
         }
         return map;
     }
+
+    public Float getPaperTagData(int paper_id, int tag_id){
+        return (Float)redisTemplate.opsForHash().get(PAPER_TAG_TABLE+paper_id, tag_id);
+    }
+
     public void addPaperTagData(int paper_id, Map<Integer, TagRela> map){
         redisTemplate.opsForHash().putAll(PAPER_TAG_TABLE+paper_id, map);
     }
     //为论文添加一个tag
     public void addPaperTagData(int paper_id, int tag_id, TagRela tr){
         redisTemplate.opsForHash().put(PAPER_TAG_TABLE+paper_id, tag_id, tr);
+    }
+
+    public void deletePaperTagData(int paperID){
+        redisTemplate.opsForHash().delete(PAPER_TAG_TABLE+paperID);
     }
     public void deletePaperTagData(String paper_id, Set<Integer> TagIdList){
         for(Integer i: TagIdList){
@@ -121,6 +131,31 @@ public class RedisService {
 //    }
 
     //论文群Tag表操作
+    public Map<Integer,Map<Integer, Float>> getAllGroupTagData(){
+        Set<String> groupSet = redisTemplate.keys(GROUP_TAG_TABLE);
+        Map<Integer,Map<Integer,Float>> result = new HashMap<>();
+        for(String groupKey: groupSet){
+            result.put(Integer.parseInt(groupKey.substring(GROUP_TAG_TABLE.length())),redisTemplate.opsForHash().entries(groupKey));
+        }
+        return result;
+    }
+
+    public List<Integer> getAllGroupID(){
+        List<Integer> result = new ArrayList<>();
+        Set<String> groupSet = redisTemplate.keys(GROUP_TAG_TABLE);
+        for(String groupKey: groupSet){
+            result.add(Integer.parseInt(groupKey.substring(GROUP_TAG_TABLE.length())));
+        }
+        return result;
+    }
+
+    public Map<Integer, Float> getGroupTagData(Integer num){
+        Set<String> groupSet = redisTemplate.keys(GROUP_TAG_TABLE);
+        String groupKey = (String)groupSet.toArray()[num];
+        num = Integer.parseInt(groupKey.substring(GROUP_TAG_TABLE.length()));
+        return redisTemplate.opsForHash().entries(groupKey);
+    }
+
     public Float getGroupTagData(int group_id, int tag_Id){
         Float value = null;
         if(!redisTemplate.opsForHash().hasKey(GROUP_TAG_TABLE+group_id, tag_Id)){
@@ -245,6 +280,33 @@ public class RedisService {
 
         for(String groupKey :groupSet){
             deleteGroupTagData(groupKey, tagIDList);
+        }
+    }
+
+    public void mergeAllTagData(List<Integer> tagID){
+        Set<String> userSet = redisTemplate.keys(USER_TAG_TABLE);
+        Set<String> paperSet = redisTemplate.keys(PAPER_TAG_TABLE);
+        Set<String> groupSet = redisTemplate.keys(GROUP_TAG_TABLE);
+
+        mergeTagData(tagID, userSet);
+        mergeTagData(tagID, paperSet);
+        mergeTagData(tagID, groupSet);
+    }
+
+    public void mergeTagData(List<Integer> tagID, Set<String> dataSet){
+        for(String key :dataSet){
+            if(redisTemplate.opsForHash().hasKey(key, tagID.get(1))){
+                float replaceValue = (float)redisTemplate.opsForHash().get(key,tagID.get(1));
+                if(redisTemplate.opsForHash().hasKey(key, tagID.get(0))){
+                    float goalValue = (float)redisTemplate.opsForHash().get(key,tagID.get(0));
+                    if(replaceValue>goalValue){
+                        redisTemplate.opsForHash().put(key, tagID.get(0), replaceValue);
+                    }
+                }else{
+                    redisTemplate.opsForHash().delete(key,tagID.get(1));
+                    redisTemplate.opsForHash().put(key, tagID.get(0), replaceValue);
+                }
+            }
         }
     }
 }

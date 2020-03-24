@@ -1,16 +1,13 @@
 package com.example.paperservice.controller;
 
+import com.example.paperservice.DataProcess.*;
 import com.example.paperservice.Entity.*;
-import com.example.paperservice.PaperServiceApplication;
 import com.example.paperservice.util.MyPasswordEncoder;
 import com.google.gson.Gson;
-import com.netflix.discovery.converters.Auto;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Pageable;
-import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashSet;
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -21,6 +18,8 @@ public class ApplicationService {
     UserService userService;
     @Autowired
     RecommendService recommendService;
+    @Autowired
+    DataManagerService dataManagerService;
 
     @PostMapping("/signin")
     public boolean signIn(@RequestBody Map params) throws Exception {
@@ -112,6 +111,46 @@ public class ApplicationService {
     @GetMapping("/tag-data")
     public List<TagSimpleData> getTagData(){
         return recommendService.getTagData();
+    }
+
+    @PostMapping("/back/new-paper")
+    public void addNewPaper(@RequestBody Map<PaperEntity, Map<Integer, Float>> paperData) throws IOException {
+        dataManagerService.addNewPapers(paperData);
+    }
+
+    @PostMapping("/back/new-tag")
+    public void addNewTag(@RequestBody List<String> tags){
+        dataManagerService.addNewTag(tags);
+    }
+
+    @DeleteMapping("/back/paper")
+    public void deletePaper(@RequestBody List<Integer> paperIDList){
+        dataManagerService.deletePaper(paperIDList);
+    }
+
+    @DeleteMapping("/back/tag")
+    public void deleteTag(@RequestBody Set<Integer> tagIDList){
+        dataManagerService.deleteTag(tagIDList);
+    }
+
+    @PostMapping("/back/tag")
+    public void mergeTag(@RequestBody List<Integer> tagID){
+        dataManagerService.mergeTag(tagID);
+    }
+
+    @GetMapping("/back/paper")
+    public List<PaperSimpleData> getPaperData(@RequestParam int pageNum){
+        return dataManagerService.getPaperData(pageNum);
+    }
+
+    @GetMapping("/back/tag")
+    public List<TagEntity> getTagData(@RequestParam int pageNum){
+        return dataManagerService.getTagData(pageNum);
+    }
+
+    @GetMapping("/back/group")
+    public Map<Integer, GroupTagData> getGroupData(@RequestParam int pageNum){
+        return dataManagerService.getGroupData(pageNum);
     }
 
     @GetMapping("/test")

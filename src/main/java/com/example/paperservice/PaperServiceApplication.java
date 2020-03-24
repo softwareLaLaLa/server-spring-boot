@@ -1,8 +1,7 @@
 package com.example.paperservice;
 
-import com.example.paperservice.controller.DataInit;
+import com.example.paperservice.DataProcess.DataInit;
 import com.example.paperservice.controller.RecommendService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.netflix.eureka.EnableEurekaClient;

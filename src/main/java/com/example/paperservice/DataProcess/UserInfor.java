@@ -1,5 +1,6 @@
-package com.example.paperservice.Entity;
+package com.example.paperservice.DataProcess;
 
+import com.example.paperservice.Entity.UserEntity;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 

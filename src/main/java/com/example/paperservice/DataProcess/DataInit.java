@@ -1,12 +1,10 @@
-package com.example.paperservice.controller;
+package com.example.paperservice.DataProcess;
 
 import com.example.paperservice.Entity.PaperEntity;
 import com.example.paperservice.Entity.TagEntity;
-import com.example.paperservice.Entity.TagRela;
 import com.example.paperservice.database.PaperDao;
 import com.example.paperservice.database.RedisService;
 import com.example.paperservice.database.TagDao;
-import com.netflix.discovery.converters.Auto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 

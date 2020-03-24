@@ -1,4 +1,4 @@
-package com.example.paperservice.Entity;
+package com.example.paperservice.DataProcess;
 
 public class ID {
     int id;

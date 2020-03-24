@@ -1,5 +1,9 @@
 package com.example.paperservice.controller;
 
+import com.example.paperservice.DataProcess.BrowseHistory;
+import com.example.paperservice.DataProcess.PaperSimpleData;
+import com.example.paperservice.DataProcess.TagRela;
+import com.example.paperservice.DataProcess.UserInfor;
 import com.example.paperservice.Entity.*;
 import com.example.paperservice.database.EvaluationDao;
 import com.example.paperservice.database.RedisService;

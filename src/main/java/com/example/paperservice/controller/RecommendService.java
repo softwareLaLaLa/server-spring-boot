@@ -1,19 +1,16 @@
 package com.example.paperservice.controller;
 
+import com.example.paperservice.DataProcess.*;
 import com.example.paperservice.Entity.*;
-import com.example.paperservice.PaperServiceApplication;
 import com.example.paperservice.database.*;
 import com.example.paperservice.util.Calculator;
 import com.google.gson.Gson;
-import com.google.gson.internal.$Gson$Preconditions;
 import com.google.gson.reflect.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
 
-import java.awt.print.Paper;
 import java.lang.reflect.Type;
 import java.util.*;
 
@@ -31,6 +28,8 @@ public class RecommendService {
     private HotPaperDao hotPaperDao;
     @Autowired
     private RedisService redisService;
+    @Autowired
+    private BaseService baseService;
 
     //添加评价，可以用队列实现
     public void addEvalData(List<EvalEntity> evalList){
@@ -175,13 +174,7 @@ public class RecommendService {
             System.out.println("groupid:"+group_id+"对应论文篇数："+paperList.size());
             List<PaperSimpleData> paperSimpleDataList = new ArrayList<>();
             for(PaperEntity paperEntity: paperList){
-                Map<Integer, TagRela> tagRelaMap = redisService.getPaperTagData(paperEntity.getId());
-                List<String> tagList = new ArrayList<>();
-                for(Integer i: tagRelaMap.keySet()){
-                    tagList.add(tagDao.findById((int)i).getName());
-                }
-
-                paperSimpleDataList.add(new PaperSimpleData(paperEntity, tagList));
+                paperSimpleDataList.add(baseService.getPaperSimpleData(paperEntity));
             }
             result.put(group_id, paperSimpleDataList);
         }
@@ -351,4 +344,6 @@ public class RecommendService {
         System.out.println("tagID："+tagIDSet+ "对应的group为："+groupIdSet);
         return groupIdSet;
     }
+
+
 }

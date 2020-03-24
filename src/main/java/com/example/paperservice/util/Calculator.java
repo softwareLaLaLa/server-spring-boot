@@ -1,10 +1,9 @@
 package com.example.paperservice.util;
 
-import com.example.paperservice.Entity.GroupData;
-import com.example.paperservice.Entity.TagRela;
+import com.example.paperservice.DataProcess.GroupData;
+import com.example.paperservice.DataProcess.TagRela;
 
 import java.io.IOException;
-import java.lang.ProcessBuilder;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -255,4 +254,50 @@ public class Calculator
 		GroupData groupData = new GroupData(groupPapers, groupTags, tagInGroup);
 		return groupData;
 	}
+
+	public static List<Integer> distance(List<List<Float>> paperData, List<List<Float>> groupData) throws IOException {
+		int tagNum = paperData.get(0).size();
+		int paperNum = paperData.size();
+		int groupNum = groupData.size();
+
+		String baseCommand = "python lalala.py ";
+		String commandStr = tagNum + " " + paperNum + " " + groupNum;
+		for(List<Float> paperTagData: paperData){
+			for(Float relation: paperTagData){
+				commandStr += " " + relation;
+			}
+		}
+		for(List<Float> groupTagData: groupData){
+			for(Float relation: groupTagData){
+				commandStr += " " + relation;
+			}
+		}
+
+		String filePath = "distanceData.txt";
+		try{
+			File file = new File(filePath);
+			PrintStream ps = new PrintStream(new FileOutputStream(file));
+			ps.println(commandStr);
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		}
+		//commandStr = baseCommand + commandStr;
+		Process pr = null;
+		try {
+			pr = Runtime.getRuntime().exec(baseCommand);
+		} catch (IOException e1) {
+			e1.printStackTrace();
+		}
+
+		BufferedReader in = new BufferedReader(new InputStreamReader(pr.getInputStream()));
+//		BufferedReader stdError = new BufferedReader(new InputStreamReader(pr.getErrorStream()));
+		String line = null;
+		line = in.readLine();
+		String[] groupNums = line.split(" ");
+		List<Integer> result = new ArrayList<>();
+		for(String gNum: groupNums){
+			result.add(Integer.parseInt(gNum));
+		}
+		return result;
+ 	}
 }

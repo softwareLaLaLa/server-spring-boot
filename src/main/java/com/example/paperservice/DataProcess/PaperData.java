@@ -1,4 +1,6 @@
-package com.example.paperservice.Entity;
+package com.example.paperservice.DataProcess;
+
+import com.example.paperservice.Entity.PaperEntity;
 
 import java.util.ArrayList;
 import java.util.List;
