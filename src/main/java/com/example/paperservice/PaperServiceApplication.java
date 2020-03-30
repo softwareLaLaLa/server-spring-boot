@@ -42,9 +42,9 @@ public class PaperServiceApplication {
         service3.scheduleAtFixedRate(new Runnable() {
             @Override
             public void run() {
-                recommendService.clusterPaper();
+                recommendService.clusterPaper(15);
             }
-        }, 10, 30, TimeUnit.DAYS);
+        }, 1, 30, TimeUnit.DAYS);
     }
 
 }

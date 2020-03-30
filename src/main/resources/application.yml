@@ -9,7 +9,7 @@ spring:
       password: 213100
       name: Yama
   datasource:
-    url: jdbc:mysql://122.51.19.164:3306/paper_app?serverTimezone=GMT
+    url: jdbc:mysql://localhost:3306/paper_app?serverTimezone=GMT
     username: root
     password: Comfortalway1!
     driver-class-name: com.mysql.cj.jdbc.Driver
@@ -23,5 +23,5 @@ spring:
         max-active: 8
         max-wait: 1
         min-idle: 0
-    timeout: 500
+    timeout: 5000
     password:

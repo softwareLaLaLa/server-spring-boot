@@ -80,6 +80,7 @@ public class DataInit {
                         // Create and insert each paper
                         PaperEntity aPaper = new PaperEntity(infos[0], infos[2], infos[1], 0, 1, 0);
                         System.out.println("Now insert the paper and relation: " + infos[0]);
+                        System.out.println("relation data " + paperTag);
                         paperDao.save(aPaper);
                         // insert paper's tags
                         redisService.addPaperTagData(aPaper.getId(), paperTag);

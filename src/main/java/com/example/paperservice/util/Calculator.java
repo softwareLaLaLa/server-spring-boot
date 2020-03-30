@@ -134,11 +134,10 @@ public class Calculator
 		return result;
 	}
 
-	public static GroupData Cluster(List<List<Float>> allPaperTags) {
+	public static GroupData Cluster(List<List<Float>> allPaperTags, int clusterNums) {
 		String tagNum = String.valueOf(allPaperTags.get(0).size()); // ��ǩ������
 		String paperNum = String.valueOf(allPaperTags.size()); // ��������
 
-		int clusterNums = 15;
 		String clusterNum = String.valueOf(clusterNums); // ����group��
 		String baseCommand = "python KMeans.py ";
 		String commandStr = new String(
@@ -260,7 +259,7 @@ public class Calculator
 		int paperNum = paperData.size();
 		int groupNum = groupData.size();
 
-		String baseCommand = "python lalala.py ";
+		String baseCommand = "python distance.py ";
 		String commandStr = tagNum + " " + paperNum + " " + groupNum;
 		for(List<Float> paperTagData: paperData){
 			for(Float relation: paperTagData){
@@ -283,16 +282,19 @@ public class Calculator
 		}
 		//commandStr = baseCommand + commandStr;
 		Process pr = null;
+		String line = null;
 		try {
 			pr = Runtime.getRuntime().exec(baseCommand);
+			InputStreamReader in =new InputStreamReader(pr.getInputStream());
+//		BufferedReader stdError = new BufferedReader(new InputStreamReader(pr.getErrorStream()));
+			LineNumberReader input = new LineNumberReader(in);
+			line = input.readLine();
+			input.close();
+			in.close();
+			System.out.println("计算结果："+line);
 		} catch (IOException e1) {
 			e1.printStackTrace();
 		}
-
-		BufferedReader in = new BufferedReader(new InputStreamReader(pr.getInputStream()));
-//		BufferedReader stdError = new BufferedReader(new InputStreamReader(pr.getErrorStream()));
-		String line = null;
-		line = in.readLine();
 		String[] groupNums = line.split(" ");
 		List<Integer> result = new ArrayList<>();
 		for(String gNum: groupNums){

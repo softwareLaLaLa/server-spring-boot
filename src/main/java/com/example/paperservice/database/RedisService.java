@@ -1,5 +1,6 @@
 package com.example.paperservice.database;
 
+import com.example.paperservice.DataProcess.ID;
 import com.example.paperservice.DataProcess.PaperSimpleData;
 import com.example.paperservice.DataProcess.TagRela;
 import com.google.gson.Gson;
@@ -14,7 +15,7 @@ import java.util.*;
 public class RedisService {
     private static String PAPER_TAG_TABLE = "paperTag_";
     //static String PAPER_CLC_TABLE = "paperClick_";
-    static String GROUP_TAG_TABLE = "groupTag_";
+    static String GROUP_TAG_TABLE = "grouplalaTag_";
     static String USER_TAG_TABLE = "userTag_";
     //static String USER_GROUP_TABLE = "userGroup_";
     static String BRO_TABLE = "broHis_";
@@ -79,7 +80,10 @@ public class RedisService {
     }
 
     public Float getPaperTagData(int paper_id, int tag_id){
-        return (Float)redisTemplate.opsForHash().get(PAPER_TAG_TABLE+paper_id, tag_id);
+        if (redisTemplate.opsForHash().hasKey(PAPER_TAG_TABLE+paper_id, tag_id)){
+            return ((TagRela)redisTemplate.opsForHash().get(PAPER_TAG_TABLE+paper_id, tag_id)).getCorrelation();
+        }
+        return new Float(0);
     }
 
     public void addPaperTagData(int paper_id, Map<Integer, TagRela> map){
@@ -132,9 +136,11 @@ public class RedisService {
 
     //论文群Tag表操作
     public Map<Integer,Map<Integer, Float>> getAllGroupTagData(){
-        Set<String> groupSet = redisTemplate.keys(GROUP_TAG_TABLE);
+        Set<String> groupSet = redisTemplate.keys(GROUP_TAG_TABLE+"*");
+        System.out.println("groupSet:"+groupSet);
         Map<Integer,Map<Integer,Float>> result = new HashMap<>();
         for(String groupKey: groupSet){
+            System.out.println("groupid:"+Integer.parseInt(groupKey.substring(GROUP_TAG_TABLE.length())));
             result.put(Integer.parseInt(groupKey.substring(GROUP_TAG_TABLE.length())),redisTemplate.opsForHash().entries(groupKey));
         }
         return result;
@@ -142,17 +148,19 @@ public class RedisService {
 
     public List<Integer> getAllGroupID(){
         List<Integer> result = new ArrayList<>();
-        Set<String> groupSet = redisTemplate.keys(GROUP_TAG_TABLE);
+        Set<String> groupSet = redisTemplate.keys(GROUP_TAG_TABLE+"*");
         for(String groupKey: groupSet){
             result.add(Integer.parseInt(groupKey.substring(GROUP_TAG_TABLE.length())));
         }
         return result;
     }
 
-    public Map<Integer, Float> getGroupTagData(Integer num){
-        Set<String> groupSet = redisTemplate.keys(GROUP_TAG_TABLE);
-        String groupKey = (String)groupSet.toArray()[num];
-        num = Integer.parseInt(groupKey.substring(GROUP_TAG_TABLE.length()));
+    public Map<Integer, Float> getGroupTagData(ID num){
+        Map<Integer, Map<Integer, Float>> result = new HashMap<>();
+        Set<String> groupSet = redisTemplate.keys(GROUP_TAG_TABLE+"*");
+        String groupKey = (String)groupSet.toArray()[num.getId()];
+        num.setId(Integer.parseInt(groupKey.substring(GROUP_TAG_TABLE.length())));
+        System.out.println("groupid:"+num);
         return redisTemplate.opsForHash().entries(groupKey);
     }
 
@@ -181,13 +189,24 @@ public class RedisService {
         System.out.println("更新group的tag数据"+map);
         for(Object id: redisTemplate.keys(GROUP_TAG_TABLE+"*")) {
             String group_id = (String) id;
-            Set<Integer> idList = redisTemplate.opsForHash().keys(group_id);
-            deleteGroupTagData(group_id, idList);
+            deleteGroupTagData(group_id);
         }
-        for(Integer i: map.keySet()){
-            redisTemplate.opsForHash().putAll(GROUP_TAG_TABLE+i, map.get(i));
+        try {
+            for (Integer i : map.keySet()) {
+                String groupKey = GROUP_TAG_TABLE + i;
+                System.out.println(groupKey);
+                redisTemplate.opsForHash().putAll(groupKey, map.get(i));
+            }
+        }catch (Exception e){
+            e.printStackTrace();
         }
     }
+
+    public void deleteGroupTagData(String group_id){
+        Set<Integer> tagIDList = redisTemplate.opsForHash().keys(group_id);
+        deleteGroupTagData(group_id, tagIDList);
+    }
+
     public void deleteGroupTagData(String group_id, Set<Integer> TagIdList){
         for(Integer i: TagIdList){
             deleteGroupTagData(group_id, i);
@@ -263,9 +282,9 @@ public class RedisService {
 //    }
 
     public void deleteTagData(Set<Integer> tagIDList){
-        Set<String> userSet = redisTemplate.keys(USER_TAG_TABLE);
-        Set<String> paperSet = redisTemplate.keys(PAPER_TAG_TABLE);
-        Set<String> groupSet = redisTemplate.keys(GROUP_TAG_TABLE);
+        Set<String> userSet = redisTemplate.keys(USER_TAG_TABLE+'*');
+        Set<String> paperSet = redisTemplate.keys(PAPER_TAG_TABLE+'*');
+        Set<String> groupSet = redisTemplate.keys(GROUP_TAG_TABLE+'*');
         System.out.println("userSet:"+ userSet);
         System.out.println("paperSet:"+ paperSet);
         System.out.println("groupSet:"+ groupSet);
@@ -284,9 +303,9 @@ public class RedisService {
     }
 
     public void mergeAllTagData(List<Integer> tagID){
-        Set<String> userSet = redisTemplate.keys(USER_TAG_TABLE);
-        Set<String> paperSet = redisTemplate.keys(PAPER_TAG_TABLE);
-        Set<String> groupSet = redisTemplate.keys(GROUP_TAG_TABLE);
+        Set<String> userSet = redisTemplate.keys(USER_TAG_TABLE+'*');
+        Set<String> paperSet = redisTemplate.keys(PAPER_TAG_TABLE+'*');
+        Set<String> groupSet = redisTemplate.keys(GROUP_TAG_TABLE+'*');
 
         mergeTagData(tagID, userSet);
         mergeTagData(tagID, paperSet);

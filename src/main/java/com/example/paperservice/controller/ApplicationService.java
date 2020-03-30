@@ -113,8 +113,9 @@ public class ApplicationService {
         return recommendService.getTagData();
     }
 
+
     @PostMapping("/back/new-paper")
-    public void addNewPaper(@RequestBody Map<PaperEntity, Map<Integer, Float>> paperData) throws IOException {
+    public void addNewPaper(@RequestBody List<AddedPaperData> paperData) throws IOException {
         dataManagerService.addNewPapers(paperData);
     }
 
@@ -134,8 +135,8 @@ public class ApplicationService {
     }
 
     @PostMapping("/back/tag")
-    public void mergeTag(@RequestBody List<Integer> tagID){
-        dataManagerService.mergeTag(tagID);
+    public TagEntity mergeTag(@RequestBody List<Integer> tagID){
+        return dataManagerService.mergeTag(tagID);
     }
 
     @GetMapping("/back/paper")
@@ -150,7 +151,14 @@ public class ApplicationService {
 
     @GetMapping("/back/group")
     public Map<Integer, GroupTagData> getGroupData(@RequestParam int pageNum){
-        return dataManagerService.getGroupData(pageNum);
+        ID groupNum = new ID();
+        groupNum.setId(pageNum);
+        return dataManagerService.getGroupData(groupNum);
+    }
+
+    @GetMapping("/back/cluster")
+    public boolean clusterPaper(@RequestParam int clusterNum){
+        return recommendService.clusterPaper(clusterNum);
     }
 
     @GetMapping("/test")

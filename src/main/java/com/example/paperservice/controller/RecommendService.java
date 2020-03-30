@@ -241,7 +241,7 @@ public class RecommendService {
         return new PaperData(paperEntity, tagData);
     }
 
-    public void clusterPaper(){
+    public boolean clusterPaper(int clusterNums){
         System.out.println("对论文聚类");
         List<PaperEntity> paperList = paperDao.findAll();
         List<Integer> paperIDList = new ArrayList<>();
@@ -257,7 +257,7 @@ public class RecommendService {
         List<List<Float>> matrix = getMatrixData(papersTagData, tagList);
         System.out.println("开始聚类");
         //聚类
-        GroupData groupData = Calculator.Cluster(matrix);
+        GroupData groupData = Calculator.Cluster(matrix, clusterNums);
 
         //每个group包含的ID
         List<List<Integer>> groupPaperIDList = groupData.getPapers();
@@ -320,6 +320,7 @@ public class RecommendService {
         }
         redisService.refreshGroupTagData(groupsData);
         System.out.println("聚类结束");
+        return true;
     }
 
     public List<TagSimpleData> getTagData(){

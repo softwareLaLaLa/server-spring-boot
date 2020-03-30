@@ -1,10 +1,11 @@
 package com.example.paperservice.Entity;
 
 import javax.persistence.*;
+import java.io.Serializable;
 
 @Entity
 @Table(name = "paper")
-public class PaperEntity {
+public class PaperEntity implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
