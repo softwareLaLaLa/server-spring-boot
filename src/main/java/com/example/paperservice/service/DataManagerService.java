@@ -1,4 +1,4 @@
-package com.example.paperservice.controller;
+package com.example.paperservice.service;
 
 import com.example.paperservice.DataProcess.*;
 import com.example.paperservice.Entity.PaperEntity;
@@ -63,7 +63,7 @@ public class DataManagerService {
         }
     }
 
-    private List<List<Float>> getRelationData(List<Map<Integer, Float>> data){
+    public List<List<Float>> getRelationData(List<Map<Integer, Float>> data){
         List<Integer> tagIDList = tagDao.findAllId();
         System.out.println("tagID:"+tagIDList);
         List<List<Float>> relationData = new ArrayList<>();
@@ -162,7 +162,7 @@ public class DataManagerService {
         return result;
     }
 
-    private void getRelativePaperNum(List<Integer> paperIDList, Map<Integer, GroupTagData> tagData){
+    public void getRelativePaperNum(List<Integer> paperIDList, Map<Integer, GroupTagData> tagData){
         float level = (float)0.5;
         System.out.println("paperIDList:"+paperIDList);
 

@@ -1,4 +1,4 @@
-package com.example.paperservice.controller;
+package com.example.paperservice.service;
 
 import com.example.paperservice.DataProcess.*;
 import com.example.paperservice.Entity.*;
@@ -106,7 +106,7 @@ public class RecommendService {
     }
 
     //添加用户浏览信息，可以用队列实现
-     private boolean addBrowseNumForPaper(int paper_id){
+     public boolean addBrowseNumForPaper(int paper_id){
         //更新论文数据
         if(!paperDao.existsById(paper_id)){
             System.out.println("不存在该论文！");
@@ -345,6 +345,4 @@ public class RecommendService {
         System.out.println("tagID："+tagIDSet+ "对应的group为："+groupIdSet);
         return groupIdSet;
     }
-
-
 }

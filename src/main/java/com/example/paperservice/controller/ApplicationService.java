@@ -2,6 +2,9 @@ package com.example.paperservice.controller;
 
 import com.example.paperservice.DataProcess.*;
 import com.example.paperservice.Entity.*;
+import com.example.paperservice.service.DataManagerService;
+import com.example.paperservice.service.RecommendService;
+import com.example.paperservice.service.UserService;
 import com.example.paperservice.util.MyPasswordEncoder;
 import com.google.gson.Gson;
 import org.springframework.beans.factory.annotation.Autowired;

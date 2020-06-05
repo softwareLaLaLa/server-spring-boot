@@ -1,4 +1,4 @@
-package com.example.paperservice.controller;
+package com.example.paperservice.service;
 
 import com.example.paperservice.DataProcess.BrowseHistory;
 import com.example.paperservice.DataProcess.PaperSimpleData;

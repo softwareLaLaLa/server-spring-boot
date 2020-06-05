@@ -23,6 +23,7 @@ public class EvalEntity {
     //@Column(name = "tags")
     //private String tagIDList;
 
+
     @Column(name = "date")
     private Date date;
 

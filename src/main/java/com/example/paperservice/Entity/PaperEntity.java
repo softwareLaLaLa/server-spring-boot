@@ -63,6 +63,10 @@ public class PaperEntity implements Serializable {
         return evalNum;
     }
 
+    public void setId(int id) {
+        this.id = id;
+    }
+
     public void setBrowseNum(int browseNum) {
         this.browseNum = browseNum;
     }
@@ -81,6 +85,17 @@ public class PaperEntity implements Serializable {
 
     public void setGroupID(int groupId) {
         this.groupId = groupId;
+    }
+
+    public PaperEntity(int id, String title, String abst, String resUrl, int browseNum, int evalNum, int uncheckNum, int groupID) {
+        this.id = id;
+        this.title = title;
+        this.abst = abst;
+        this.resUrl = resUrl;
+        this.browseNum = browseNum;
+        this.evalNum = evalNum;
+        this.uncheckNum = uncheckNum;
+        this.groupId = groupID;
     }
 
     public PaperEntity(String title, String abst, String resUrl, int browseNum, int evalNum, int uncheckNum, int groupID) {
